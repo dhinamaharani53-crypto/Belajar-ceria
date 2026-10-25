@@ -1,0 +1,13 @@
+
+{
+  "id": "./",
+  "name": "Belajar Ceria",
+  "short_name": "Belajar Ceria",
+  "description": "Aplikasi belajar interaktif untuk anak SD",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f7ff",
+  "theme_color": "#4389f5"
+}
+

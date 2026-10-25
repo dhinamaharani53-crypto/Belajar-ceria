@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4389f5">
+  <meta name="description" content="Aplikasi belajar interaktif untuk anak SD">
+  <title>Belajar Ceria</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f7ff;
+      color: #24334a;
+    }
+
+    header {
+      padding: 25px 16px;
+      background: #4389f5;
+      color: white;
+      text-align: center;
+      border-radius: 0 0 25px 25px;
+    }
+
+    main {
+      max-width: 680px;
+      margin: 20px auto;
+      padding: 0 14px;
+    }
+
+    .card {
+      background: white;
+      padding: 18px;
+      margin-bottom: 16px;
+      border-radius: 18px;
+    }
+
+    button {
+      padding: 12px 16px;
+      margin: 4px;
+      border: 0;
+      border-radius: 10px;
+      background: #4389f5;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:focus-visible {
+      outline: 3px solid #24334a;
+      outline-offset: 3px;
+    }
+
+    .answer {
+      display: block;
+      width: 100%;
+      background: #eaf2ff;
+      color: #24334a;
+      text-align: left;
+    }
+
+    #feedback { font-weight: bold; }
+    .muted { color: #52647b; }
+
+    video {
+      width: 100%;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🌈 Belajar Ceria</h1>
+    <p>Belajar, bermain, dan meraih prestasi!</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>📚 Pilih Pelajaran</h2>
+      <button onclick="showLesson('math')">Matematika</button>
+      <button onclick="showLesson('bahasa')">Bahasa Indonesia</button>
+      <button onclick="showLesson('ipas')">IPAS</button>
+      <div id="lesson" aria-live="polite">
+        Pilih pelajaran untuk mulai belajar.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>⭐ Kuis Pintar</h2>
+      <p id="question"></p>
+      <div id="answers"></div>
+      <p id="feedback" aria-live="polite"></p>
+      <p>Nilai kuis ini: <strong id="score">0</strong></p>
+      <button onclick="nextQuestion()">Soal Berikutnya</button>
+    </section>
+
+    <section class="card">
+      <h2>🎮 Permainan Angka</h2>
+      <p>Berapa hasil dari 4 × 3?</p>
+      <button onclick="playGame(10)">10</button>
+      <button onclick="playGame(12)">12</button>
+      <button onclick="playGame(14)">14</button>
+      <p id="gameFeedback" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <h2>🎥 Video Pembelajaran</h2>
+      <p class="muted">
+        Video dapat dipasang di sini setelah kamu memiliki
+        file video yang boleh digunakan.
+      </p>
+      <p id="videoStatus">Video belum ditambahkan.</p>
+      <!-- Tambahkan video milik sendiri di tahap berikutnya. -->
+    </section>
+
+    <section class="card">
+      <h2>🏆 Riwayat Nilai di Perangkat Ini</h2>
+      <p id="history"></p>
+    </section>
+  </main>
+
+  <script>
+    const lessons = {
+      math: `
+        <h3>Penjumlahan</h3>
+        <p>Penjumlahan berarti menggabungkan bilangan.</p>
+        <p>Contoh: 2 + 3 = 5.</p>
+      `,
+      bahasa: `
+        <h3>Kata Benda</h3>
+        <p>Kata benda dapat menyebut orang, tempat,
+        hewan, atau benda. Contoh: buku dan kucing.</p>
+      `,
+      ipas: `
+        <h3>Makhluk Hidup</h3>
+        <p>Manusia, hewan, dan tumbuhan merupakan
+        contoh makhluk hidup.</p>
+      `
+    };
+
+    function showLesson(subject) {
+      document.getElementById("lesson").innerHTML =
+        lessons[subject];
+    }
+
+    const questions = [
+      { text: "5 + 3 = ?", answers: [6, 8, 9], correct: 8 },
+      { text: "10 - 4 = ?", answers: [5, 6, 7], correct: 6 },
+      { text: "7 + 2 = ?", answers: [8, 9, 10], correct: 9 }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let answered = false;
+
+    function renderQuestion() {
+      const q = questions[current];
+      document.getElementById("question").textContent = q.text;
+      document.getElementById("feedback").textContent = "";
+      const area = document.getElementById("answers");
+      area.replaceChildren();
+
+      q.answers.forEach(value => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.textContent = value;
+        button.onclick = () => checkAnswer(value);
+        area.appendChild(button);
+      });
+
+      answered = false;
+    }
+
+    function checkAnswer(value) {
+      if (answered) return;
+      answered = true;
+
+      if (value === questions[current].correct) {
+        score += 10;
+        document.getElementById("feedback").textContent =
+          "Hebat! Jawabanmu benar!";
+      } else {
+        document.getElementById("feedback").textContent =
+          "Belum tepat. Jawaban: " +
+          questions[current].correct;
+      }
+
+      document.getElementById("score").textContent = score;
+      saveResult();
+    }
+
+    function nextQuestion() {
+      current = (current + 1) % questions.length;
+      renderQuestion();
+    }
+
+    function playGame(value) {
+      document.getElementById("gameFeedback").textContent =
+        value === 12
+          ? "Benar! Kamu mendapat 5 poin permainan."
+          : "Coba lagi, ya! 4 × 3 = 12.";
+    }
+
+    function saveResult() {
+      const results = JSON.parse(
+        localStorage.getItem("belajarCeriaResults") || "[]"
+      );
+
+      results.push({
+        score: score,
+        date: new Date().toLocaleString("id-ID")
+      });
+
+      localStorage.setItem(
+        "belajarCeriaResults",
+        JSON.stringify(results)
+      );
+
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const results = JSON.parse(
+        localStorage.getItem("belajarCeriaResults") || "[]"
+      );
+
+      document.getElementById("history").textContent =
+        results.length
+          ? results.map(r => r.date + " — " + r.score +
+              " poin").join(" | ")
+          : "Belum ada nilai tersimpan.";
+    }
+
+    renderQuestion();
+    renderHistory();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+          .catch(error => console.error(
+            "Service worker gagal:", error
+          ));
+      });
+    }
+  </script>
+</body>
+</html>
+
